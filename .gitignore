@@ -208,3 +208,6 @@ __marimo__/
 
 # uv
 .python-version
+
+# setuptools_scm
+src/nb_order_validator/_version.py
