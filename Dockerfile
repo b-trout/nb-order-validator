@@ -24,20 +24,18 @@ WORKDIR /workspace
 RUN chown -R $USERNAME:$USERNAME /workspace
 
 # Copy project files
-COPY pyproject.toml ./
-COPY src/ ./src/
-COPY tests/ ./tests/
+COPY --chown=$USERNAME:$USERNAME pyproject.toml ./
+COPY --chown=$USERNAME:$USERNAME src/ ./src/
+COPY --chown=$USERNAME:$USERNAME tests/ ./tests/
+
+# Switch to non-root user before installation
+USER $USERNAME
 
 # Install the package in editable mode with dev dependencies
 # Use SETUPTOOLS_SCM_PRETEND_VERSION to set version without .git directory
 ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NB_ORDER_VALIDATOR=${SETUPTOOLS_SCM_PRETEND_VERSION}
 RUN uv sync --all-groups \
-    && rm -rf /root/.cache/uv \
-    && apt-get clean \
-    && rm -rf /var/cache/apt/*
-
-# Switch to non-root user
-USER $USERNAME
+    && rm -rf ~/.cache/uv
 
 # Set up git safe directory for the user
 RUN git config --global --add safe.directory /workspace || true
