@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout code
@@ -104,7 +104,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -f Dockerfile.dev -t nb-order-validator:test .
+          docker build -f Dockerfile -t nb-order-validator:test .
 
       - name: Run tests in Docker
         run: |
