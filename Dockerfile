@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user with sudo privileges
+# Build arguments for version and user
+ARG SETUPTOOLS_SCM_PRETEND_VERSION=dev
 ARG USERNAME=developer
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
@@ -26,9 +27,10 @@ RUN chown -R $USERNAME:$USERNAME /workspace
 COPY pyproject.toml ./
 COPY src/ ./src/
 COPY tests/ ./tests/
-COPY .git/ ./.git/
 
 # Install the package in editable mode with dev dependencies
+# Use SETUPTOOLS_SCM_PRETEND_VERSION to set version without .git directory
+ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NB_ORDER_VALIDATOR=${SETUPTOOLS_SCM_PRETEND_VERSION}
 RUN uv sync --all-groups \
     && rm -rf /root/.cache/uv \
     && apt-get clean \
