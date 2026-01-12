@@ -76,7 +76,8 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 78
+extend-exclude = ["src/nb_order_validator/_version.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]  # テスト実行時に src をパスに通す
+pythonpath = ["src"]
