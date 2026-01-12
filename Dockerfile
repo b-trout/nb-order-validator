@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Build arguments for version and user
-ARG SETUPTOOLS_SCM_PRETEND_VERSION=dev
+ARG SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0.dev0
 ARG USERNAME=developer
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
