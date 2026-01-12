@@ -25,6 +25,8 @@ RUN chown -R $USERNAME:$USERNAME /workspace
 
 # Copy project files
 COPY --chown=$USERNAME:$USERNAME pyproject.toml ./
+COPY --chown=$USERNAME:$USERNAME .pre-commit-hooks.yaml ./
+COPY --chown=$USERNAME:$USERNAME README.md ./
 COPY --chown=$USERNAME:$USERNAME src/ ./src/
 COPY --chown=$USERNAME:$USERNAME tests/ ./tests/
 

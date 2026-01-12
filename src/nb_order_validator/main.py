@@ -29,11 +29,16 @@ Examples:
         ❌ Incorrect execution order: notebook2.ipynb
 """
 
+import os
 import sys
 import argparse
 import ijson
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
+
+# Set UTF-8 encoding for Windows environment
+if sys.platform == "win32":
+    os.environ["PYTHONIOENCODING"] = "utf-8"
 
 
 def get_execution_counts(filepath: Path) -> list[int | None]:
@@ -140,6 +145,14 @@ def process_file(filepath: Path) -> tuple[Path, bool]:
 
 
 def main() -> None:
+    # Ensure UTF-8 encoding for stdout/stderr on Windows
+    if sys.platform == "win32":
+        # Reconfigure stdout and stderr to use UTF-8
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(
         description="Verify that Jupyter Notebook execution counts are consecutive."
     )
