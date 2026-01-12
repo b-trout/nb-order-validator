@@ -1,0 +1,7 @@
+- id: check-nb-order
+  name: Check Notebook Order
+  description: Verify Jupyter Notebook execution order.
+  entry: check-nb-order
+  language: python
+  types: [jupyter]
+  require_serial: false
