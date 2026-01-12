@@ -105,8 +105,17 @@ jobs:
       - name: Get version from git
         id: version
         run: |
-          # Get version from git tags, or use commit SHA if no tags
-          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "0.0.0-${GITHUB_SHA::8}")
+          # Get version from git tags, or create a PEP 440 compliant dev version
+          if git describe --tags --exact-match HEAD 2>/dev/null; then
+            # On a tag, use it directly
+            VERSION=$(git describe --tags --exact-match HEAD)
+          elif git describe --tags 2>/dev/null; then
+            # Has tags in history, use distance-based version
+            VERSION=$(git describe --tags --long | sed 's/-\([0-9]*\)-g\([0-9a-f]*\)/+\1.g\2/')
+          else
+            # No tags, use commit-based dev version
+            VERSION="0.0.0.dev$(git rev-list --count HEAD)+g$(git rev-parse --short HEAD)"
+          fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Build Docker image
