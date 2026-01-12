@@ -46,18 +46,32 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+nb_order_validator = ["py.typed"]
+
 [tool.setuptools_scm]
 write_to = "src/nb_order_validator/_version.py"
 
 [tool.mypy]
 python_version = "3.10"
+mypy_path = "src"
 files = ["src", "tests"]
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+disallow_untyped_decorators = false  # Allow pytest decorators
+explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = "ijson.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pytest.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "_pytest.*"
 ignore_missing_imports = true
 
 [tool.ruff]

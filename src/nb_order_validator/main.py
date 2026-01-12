@@ -28,6 +28,7 @@ Examples:
         $ nb-order-validator notebook1.ipynb notebook2.ipynb notebook3.ipynb
         ❌ Incorrect execution order: notebook2.ipynb
 """
+
 import sys
 import argparse
 import ijson
