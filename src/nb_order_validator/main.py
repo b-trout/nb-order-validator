@@ -29,6 +29,7 @@ Examples:
         ❌ Incorrect execution order: notebook2.ipynb
 """
 
+import io
 import sys
 import argparse
 import ijson
@@ -140,6 +141,12 @@ def process_file(filepath: Path) -> tuple[Path, bool]:
 
 
 def main() -> None:
+    # Ensure UTF-8 encoding for stdout on Windows
+    if sys.platform == "win32":
+        sys.stdout = io.TextIOWrapper(
+            sys.stdout.buffer, encoding="utf-8", errors="replace"
+        )
+
     parser = argparse.ArgumentParser(
         description="Verify that Jupyter Notebook execution counts are consecutive."
     )
