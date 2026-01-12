@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nb-order-validator"
+dynamic = ["version"]
+description = "A CLI tool and pre-commit hook to verify Jupyter Notebook execution order."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT License"}
+authors = [
+  {name = "Your Name", email = "your.email@example.com"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+]
+dependencies = [
+    "ijson>=3.4.0.post0",
+]
+
+[project.scripts]
+check-nb-order = "nb_order_validator.main:main"
+
+[project.urls]
+Homepage = "https://github.com/your-username/nb-order-validator"
+Repository = "https://github.com/your-username/nb-order-validator"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.11",
+    "types-setuptools>=80.9.0.20251223",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+write_to = "src/nb_order_validator/_version.py"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src", "tests"]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = "ijson.*"
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 78
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]  # テスト実行時に src をパスに通す
