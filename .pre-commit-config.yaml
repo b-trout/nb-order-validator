@@ -14,8 +14,8 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: [ijson, types-setuptools]
-        args: ["--scripts-are-modules"]
+        additional_dependencies: [ijson, types-setuptools, pytest]
+        args: ["--scripts-are-modules", "--config-file=pyproject.toml"]
 
   # 3. Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
