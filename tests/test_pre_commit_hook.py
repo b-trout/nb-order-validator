@@ -50,9 +50,9 @@ class TestPreCommitHookConfiguration:
     def test_hook_configuration_file_exists(self) -> None:
         """Verify that .pre-commit-hooks.yaml exists in the repository."""
         hook_file = Path(__file__).parent.parent / ".pre-commit-hooks.yaml"
-        assert (
-            hook_file.exists()
-        ), ".pre-commit-hooks.yaml not found in repository root"
+        assert hook_file.exists(), (
+            ".pre-commit-hooks.yaml not found in repository root"
+        )
 
     def test_hook_configuration_is_valid_format(self) -> None:
         """
@@ -74,9 +74,9 @@ class TestPreCommitHookConfiguration:
             "types:",
         ]
         for pattern in required_patterns:
-            assert (
-                pattern in content
-            ), f"Hook config should contain '{pattern}'"
+            assert pattern in content, (
+                f"Hook config should contain '{pattern}'"
+            )
 
     def test_hook_has_required_fields(self) -> None:
         """
@@ -87,15 +87,15 @@ class TestPreCommitHookConfiguration:
         content = hook_file.read_text(encoding="utf-8")
 
         # Verify specific values
-        assert (
-            "id: check-nb-order" in content
-        ), "Hook id should be 'check-nb-order'"
-        assert (
-            "entry: check-nb-order" in content
-        ), "Hook entry should be 'check-nb-order'"
-        assert (
-            "language: python" in content
-        ), "Hook language should be 'python'"
+        assert "id: check-nb-order" in content, (
+            "Hook id should be 'check-nb-order'"
+        )
+        assert "entry: check-nb-order" in content, (
+            "Hook entry should be 'check-nb-order'"
+        )
+        assert "language: python" in content, (
+            "Hook language should be 'python'"
+        )
 
     def test_hook_targets_jupyter_files(self) -> None:
         """
@@ -146,12 +146,12 @@ class TestPreCommitHookExecution:
             timeout=5,
         )
 
-        assert (
-            result.returncode == 0
-        ), f"Hook should pass for valid notebook. stderr: {result.stderr}"
-        assert (
-            "❌" not in result.stdout
-        ), "Should not show error for valid notebook"
+        assert result.returncode == 0, (
+            f"Hook should pass for valid notebook. stderr: {result.stderr}"
+        )
+        assert "❌" not in result.stdout, (
+            "Should not show error for valid notebook"
+        )
 
     def test_hook_rejects_invalid_notebook(self, tmp_path: Path) -> None:
         """
@@ -169,12 +169,12 @@ class TestPreCommitHookExecution:
         )
 
         assert result.returncode == 1, "Hook should fail for invalid notebook"
-        assert (
-            "❌" in result.stdout
-        ), "Should show error message for invalid notebook"
-        assert (
-            "invalid.ipynb" in result.stdout
-        ), "Should mention the problematic file"
+        assert "❌" in result.stdout, (
+            "Should show error message for invalid notebook"
+        )
+        assert "invalid.ipynb" in result.stdout, (
+            "Should mention the problematic file"
+        )
 
     def test_hook_processes_multiple_files(self, tmp_path: Path) -> None:
         """
@@ -200,18 +200,18 @@ class TestPreCommitHookExecution:
             timeout=5,
         )
 
-        assert (
-            result.returncode == 1
-        ), "Hook should fail when any notebook is invalid"
-        assert (
-            "invalid.ipynb" in result.stdout
-        ), "Should report the invalid notebook"
-        assert (
-            "valid1.ipynb" not in result.stdout
-        ), "Should not report valid notebooks"
-        assert (
-            "valid2.ipynb" not in result.stdout
-        ), "Should not report valid notebooks"
+        assert result.returncode == 1, (
+            "Hook should fail when any notebook is invalid"
+        )
+        assert "invalid.ipynb" in result.stdout, (
+            "Should report the invalid notebook"
+        )
+        assert "valid1.ipynb" not in result.stdout, (
+            "Should not report valid notebooks"
+        )
+        assert "valid2.ipynb" not in result.stdout, (
+            "Should not report valid notebooks"
+        )
 
     def test_hook_handles_empty_notebooks(self, tmp_path: Path) -> None:
         """
@@ -246,9 +246,9 @@ class TestPreCommitHookExecution:
             timeout=5,
         )
 
-        assert (
-            result.returncode == 0
-        ), "Hook should accept trailing unexecuted cells"
+        assert result.returncode == 0, (
+            "Hook should accept trailing unexecuted cells"
+        )
 
     def test_hook_rejects_middle_unexecuted_cells(
         self, tmp_path: Path
@@ -267,9 +267,9 @@ class TestPreCommitHookExecution:
             timeout=5,
         )
 
-        assert (
-            result.returncode == 1
-        ), "Hook should reject unexecuted cells in the middle"
+        assert result.returncode == 1, (
+            "Hook should reject unexecuted cells in the middle"
+        )
 
 
 class TestPreCommitHookIntegration:
@@ -321,9 +321,9 @@ class TestPreCommitHookIntegration:
             timeout=5,
         )
 
-        assert (
-            result.returncode == 0
-        ), "Hook should validate notebook successfully"
+        assert result.returncode == 0, (
+            "Hook should validate notebook successfully"
+        )
 
     def test_hook_fails_with_clear_error_message(
         self, tmp_path: Path
@@ -344,9 +344,9 @@ class TestPreCommitHookIntegration:
 
         assert result.returncode == 1, "Hook should fail"
         assert result.stdout.strip() != "", "Should provide error message"
-        assert (
-            "problem.ipynb" in result.stdout
-        ), "Error message should mention the file"
+        assert "problem.ipynb" in result.stdout, (
+            "Error message should mention the file"
+        )
         assert "❌" in result.stdout, "Should include visual error indicator"
 
 
@@ -359,15 +359,15 @@ class TestHookDocumentation:
         assert readme_file.exists(), "README.md should exist"
 
         content = readme_file.read_text(encoding="utf-8")
-        assert (
-            ".pre-commit-config.yaml" in content
-        ), "README should mention .pre-commit-config.yaml"
-        assert (
-            "pre-commit install" in content
-        ), "README should document hook installation"
-        assert (
-            "check-nb-order" in content
-        ), "README should mention the hook id"
+        assert ".pre-commit-config.yaml" in content, (
+            "README should mention .pre-commit-config.yaml"
+        )
+        assert "pre-commit install" in content, (
+            "README should document hook installation"
+        )
+        assert "check-nb-order" in content, (
+            "README should mention the hook id"
+        )
 
     def test_pyproject_defines_entry_point(self) -> None:
         """
@@ -378,9 +378,9 @@ class TestHookDocumentation:
 
         content = pyproject_file.read_text(encoding="utf-8")
         assert "[project.scripts]" in content, "Should define project scripts"
-        assert (
-            "check-nb-order" in content
-        ), "Should define check-nb-order entry point"
+        assert "check-nb-order" in content, (
+            "Should define check-nb-order entry point"
+        )
 
 
 class TestHookRobustness:
