@@ -44,6 +44,22 @@ def create_notebook(path: Path, counts: list[int | None]) -> None:
         json.dump(content, f)
 
 
+def run_check_nb_order(*args: str) -> subprocess.CompletedProcess[str]:
+    """
+    Helper function to run check-nb-order with proper UTF-8 encoding.
+
+    This ensures consistent behavior across platforms, especially on Windows
+    where the default encoding may not be UTF-8.
+    """
+    return subprocess.run(
+        ["check-nb-order", *args],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=5,
+    )
+
+
 class TestPreCommitHookConfiguration:
     """Tests for verifying the pre-commit hook configuration file."""
 
@@ -117,12 +133,7 @@ class TestPreCommitHookExecution:
 
     def test_entry_point_exists(self) -> None:
         """Verify that the check-nb-order entry point is accessible."""
-        result = subprocess.run(
-            ["check-nb-order", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order("--help")
         # The command should either show help or at least not fail with
         # "command not found"
         assert result.returncode in [
@@ -139,12 +150,7 @@ class TestPreCommitHookExecution:
         notebook = tmp_path / "valid.ipynb"
         create_notebook(notebook, [1, 2, 3, 4])
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 0, (
             f"Hook should pass for valid notebook. stderr: {result.stderr}"
@@ -161,12 +167,7 @@ class TestPreCommitHookExecution:
         notebook = tmp_path / "invalid.ipynb"
         create_notebook(notebook, [1, 3, 5])  # Non-consecutive
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 1, "Hook should fail for invalid notebook"
         assert "❌" in result.stdout, (
@@ -188,17 +189,7 @@ class TestPreCommitHookExecution:
         create_notebook(valid2, [10, 11, 12])
         create_notebook(invalid, [1, 2, 4])  # Missing 3
 
-        result = subprocess.run(
-            [
-                "check-nb-order",
-                str(valid1),
-                str(valid2),
-                str(invalid),
-            ],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(valid1), str(valid2), str(invalid))
 
         assert result.returncode == 1, (
             "Hook should fail when any notebook is invalid"
@@ -220,12 +211,7 @@ class TestPreCommitHookExecution:
         notebook = tmp_path / "empty.ipynb"
         create_notebook(notebook, [])
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 0, "Hook should accept empty notebooks"
 
@@ -239,12 +225,7 @@ class TestPreCommitHookExecution:
         notebook = tmp_path / "trailing_null.ipynb"
         create_notebook(notebook, [1, 2, 3, None])
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 0, (
             "Hook should accept trailing unexecuted cells"
@@ -260,12 +241,7 @@ class TestPreCommitHookExecution:
         notebook = tmp_path / "middle_null.ipynb"
         create_notebook(notebook, [1, 2, None, 4])
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 1, (
             "Hook should reject unexecuted cells in the middle"
@@ -314,12 +290,7 @@ class TestPreCommitHookIntegration:
         create_notebook(notebook, [1, 2, 3])
 
         # Test that check-nb-order can be run directly
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 0, (
             "Hook should validate notebook successfully"
@@ -335,12 +306,7 @@ class TestPreCommitHookIntegration:
         notebook = tmp_path / "problem.ipynb"
         create_notebook(notebook, [1, 3, 2])  # Out of order
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 1, "Hook should fail"
         assert result.stdout.strip() != "", "Should provide error message"
@@ -393,12 +359,7 @@ class TestHookRobustness:
         notebook = tmp_path / "malformed.ipynb"
         notebook.write_text("{ broken json", encoding="utf-8")
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         # Should not crash, but should fail validation
         assert result.returncode in [
@@ -431,12 +392,7 @@ class TestHookRobustness:
         notebook = tmp_path / "テスト_日本語.ipynb"
         create_notebook(notebook, [1, 2, 3])
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 0, "Should handle Unicode filenames"
 
@@ -450,11 +406,6 @@ class TestHookRobustness:
         notebook = tmp_path / "large_counts.ipynb"
         create_notebook(notebook, [1000, 1001, 1002, 1003])
 
-        result = subprocess.run(
-            ["check-nb-order", str(notebook)],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        result = run_check_nb_order(str(notebook))
 
         assert result.returncode == 0, "Should handle large execution counts"
