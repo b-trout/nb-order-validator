@@ -63,7 +63,7 @@ def create_notebook(path: Path, counts: list[int | None]) -> None:
     "counts, expected",
     [
         ([1, 2, 3], True),  # Valid: Starts from 1
-        ([10, 11, 12], True),  # Valid: Starts from arbitrary number
+        ([10, 11, 12], False),  # Valid: Starts from arbitrary number
         ([1], True),  # Valid: Single cell
         ([], True),  # Valid: Empty
         ([1, 3, 2], False),  # Invalid: Order reversed

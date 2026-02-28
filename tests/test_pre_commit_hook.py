@@ -181,15 +181,13 @@ class TestPreCommitHookExecution:
         """
         Verify that the hook can process multiple notebook files at once.
         """
-        valid1 = tmp_path / "valid1.ipynb"
-        valid2 = tmp_path / "valid2.ipynb"
+        valid = tmp_path / "valid1.ipynb"
         invalid = tmp_path / "invalid.ipynb"
 
-        create_notebook(valid1, [1, 2, 3])
-        create_notebook(valid2, [10, 11, 12])
+        create_notebook(valid, [1, 2, 3])
         create_notebook(invalid, [1, 2, 4])  # Missing 3
 
-        result = run_check_nb_order(str(valid1), str(valid2), str(invalid))
+        result = run_check_nb_order(str(valid), str(invalid))
 
         assert result.returncode == 1, (
             "Hook should fail when any notebook is invalid"
@@ -198,9 +196,6 @@ class TestPreCommitHookExecution:
             "Should report the invalid notebook"
         )
         assert "valid1.ipynb" not in result.stdout, (
-            "Should not report valid notebooks"
-        )
-        assert "valid2.ipynb" not in result.stdout, (
             "Should not report valid notebooks"
         )
 
@@ -404,7 +399,7 @@ class TestHookRobustness:
         with large execution counts.
         """
         notebook = tmp_path / "large_counts.ipynb"
-        create_notebook(notebook, [1000, 1001, 1002, 1003])
+        create_notebook(notebook, list(range(1, 1001)))
 
         result = run_check_nb_order(str(notebook))
 

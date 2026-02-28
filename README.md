@@ -126,15 +126,15 @@ The tool checks the `execution_count` field in each code cell of your Jupyter No
 
 ### Valid Sequences
 
-- `[1, 2, 3, 4]` - Standard consecutive order
-- `[5, 6, 7, 8]` - Consecutive starting from any number
+- `[1, 2, 3, 4]` - Standard consecutive order from 1
 - `[1, 2, 3, null]` - Trailing unexecuted cell is allowed
 - `[]` - Empty notebook is valid
 
 ### Invalid Sequences
 
 - `[1, 3, 4]` - Missing execution count (2)
-- `[1, 2, 2, 3]` - Duplicate execution count
+- `[2, 3, 4]` - Consecutive order but not start from 1
+- `[3, 1, 2]` - Not consecutive order
 - `[1, null, 3]` - Unexecuted cell in the middle
 - `[3, 2, 1]` - Reversed order
 
