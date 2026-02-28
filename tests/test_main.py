@@ -112,22 +112,22 @@ def test_get_execution_counts_ignore_trailing_null(tmp_path: Path) -> None:
 def test_get_execution_counts_broken_json(tmp_path: Path) -> None:
     """
     Verifies behavior when the input file contains invalid JSON.
-    Expected to return an empty list without raising an exception.
+    Expected to return None without raising an exception.
     """
     f = tmp_path / "broken.ipynb"
     f.write_text("{ broken json ", encoding="utf-8")
 
     counts = get_execution_counts(f)
-    assert counts == []
+    assert counts is None
 
 
 def test_get_execution_counts_file_not_found() -> None:
     """
     Verifies behavior when the specified file does not exist.
-    Expected to return an empty list.
+    Expected to return None.
     """
     counts = get_execution_counts(Path("ghost_file.ipynb"))
-    assert counts == []
+    assert counts is None
 
 
 # ==========================================
@@ -197,3 +197,58 @@ def test_main_multiple_files(
     # Ensure only the bad file is reported
     assert "bad.ipynb" in captured.out
     assert "good.ipynb" not in captured.out
+
+
+def test_main_broken_json(
+    tmp_path: Path, capsys: CaptureFixture[str]
+) -> None:
+    """
+    Verifies that the CLI returns exit code 1 for a broken JSON notebook
+    and prints a parse error message.
+    """
+    f = tmp_path / "broken.ipynb"
+    f.write_text("{ broken json ", encoding="utf-8")
+
+    test_args = ["check-nb-order", str(f)]
+    with patch.object(sys, "argv", test_args):
+        with pytest.raises(SystemExit) as e:
+            main()
+
+    assert e.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "⚠️" in captured.out
+    assert "Failed to parse" in captured.out
+
+
+def test_main_markdown_only_notebook(
+    tmp_path: Path, capsys: CaptureFixture[str]
+) -> None:
+    """
+    Verifies that a notebook with only markdown cells passes validation.
+    Regression guard: markdown-only notebooks should exit 0.
+    """
+    content = {
+        "cells": [
+            {"cell_type": "markdown", "source": ["# Title"]},
+            {"cell_type": "markdown", "source": ["Some text"]},
+        ],
+        "metadata": {},
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+
+    f = tmp_path / "markdown_only.ipynb"
+    with f.open("w", encoding="utf-8") as fh:
+        json.dump(content, fh)
+
+    test_args = ["check-nb-order", str(f)]
+    with patch.object(sys, "argv", test_args):
+        with pytest.raises(SystemExit) as e:
+            main()
+
+    assert e.value.code == 0
+
+    captured = capsys.readouterr()
+    assert "❌" not in captured.out
+    assert "⚠️" not in captured.out
