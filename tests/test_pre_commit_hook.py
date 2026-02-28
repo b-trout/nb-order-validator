@@ -181,7 +181,7 @@ class TestPreCommitHookExecution:
         """
         Verify that the hook can process multiple notebook files at once.
         """
-        valid= tmp_path / "valid1.ipynb"
+        valid = tmp_path / "valid1.ipynb"
         invalid = tmp_path / "invalid.ipynb"
 
         create_notebook(valid, [1, 2, 3])
@@ -195,7 +195,7 @@ class TestPreCommitHookExecution:
         assert "invalid.ipynb" in result.stdout, (
             "Should report the invalid notebook"
         )
-        assert "valid.ipynb" not in result.stdout, (
+        assert "valid1.ipynb" not in result.stdout, (
             "Should not report valid notebooks"
         )
 
