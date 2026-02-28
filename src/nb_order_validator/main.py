@@ -119,7 +119,7 @@ def is_consecutive(counts: list[int | None]) -> bool:
     last = int_counts[-1]
     expected = list(range(first, last + 1))
 
-    return first == 1 & int_counts == expected
+    return first == 1 and int_counts == expected
 
 
 def process_file(filepath: Path) -> tuple[Path, bool]:
