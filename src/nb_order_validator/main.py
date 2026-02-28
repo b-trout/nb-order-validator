@@ -80,7 +80,7 @@ def is_consecutive(counts: list[int | None]) -> bool:
     This function checks if the execution counts are consecutive integers without
     gaps or duplicates. The sequence must start from any integer and increment by
     exactly 1 for each subsequent element (e.g., [3, 4, 5, 6] is valid, but
-    [1, 3, 4] or [1, 2, 2, 3] are not).
+    [1, 3, 4] or [1, None, 2, 3] are not).
 
     Parameters
     ----------
@@ -99,7 +99,7 @@ def is_consecutive(counts: list[int | None]) -> bool:
     >>> is_consecutive([1, 2, 3, 4])
     True
     >>> is_consecutive([5, 6, 7])
-    True
+    False
     >>> is_consecutive([1, 3, 4])  # Missing 2
     False
     >>> is_consecutive([1, 2, None, 4])  # Contains None
@@ -119,7 +119,7 @@ def is_consecutive(counts: list[int | None]) -> bool:
     last = int_counts[-1]
     expected = list(range(first, last + 1))
 
-    return int_counts == expected
+    return first == 1 & int_counts == expected
 
 
 def process_file(filepath: Path) -> tuple[Path, bool]:
