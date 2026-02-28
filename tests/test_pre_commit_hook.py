@@ -356,11 +356,10 @@ class TestHookRobustness:
 
         result = run_check_nb_order(str(notebook))
 
-        # Should not crash, but should fail validation
-        assert result.returncode in [
-            0,
-            1,
-        ], "Should handle malformed JSON gracefully"
+        assert result.returncode == 1, (
+            "Should fail validation for malformed JSON"
+        )
+        assert "⚠️" in result.stdout, "Should show warning for malformed JSON"
 
     def test_hook_handles_nonexistent_file(self) -> None:
         """
@@ -369,15 +368,17 @@ class TestHookRobustness:
         result = subprocess.run(
             ["check-nb-order", "nonexistent.ipynb"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=5,
         )
 
-        # Should not crash
-        assert result.returncode in [
-            0,
-            1,
-        ], "Should handle nonexistent files gracefully"
+        assert result.returncode == 1, (
+            "Should fail validation for nonexistent file"
+        )
+        assert "⚠️" in result.stdout, (
+            "Should show warning for nonexistent file"
+        )
 
     def test_hook_unicode_filename_support(self, tmp_path: Path) -> None:
         """

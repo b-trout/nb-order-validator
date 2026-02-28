@@ -18,7 +18,7 @@ Usage:
 
 Exit Codes:
     0: All notebooks have consecutive execution counts
-    1: One or more notebooks have non-consecutive execution counts
+    1: One or more notebooks have non-consecutive execution counts or failed to parse
 
 Examples:
     Validate a single notebook:
@@ -41,7 +41,7 @@ if sys.platform == "win32":
     os.environ["PYTHONIOENCODING"] = "utf-8"
 
 
-def get_execution_counts(filepath: Path) -> list[int | None]:
+def get_execution_counts(filepath: Path) -> list[int | None] | None:
     """
     Extracts the execution counts from code cells in a Jupyter Notebook.
 
@@ -52,8 +52,8 @@ def get_execution_counts(filepath: Path) -> list[int | None]:
 
     Returns
     -------
-    list[int | None]
-        A list of execution counts.
+    list[int | None] | None
+        A list of execution counts, or None if the file could not be parsed.
     """
     counts: list[int | None] = []
     try:
@@ -65,7 +65,7 @@ def get_execution_counts(filepath: Path) -> list[int | None]:
                     counts.append(cell.get("execution_count"))
 
     except (ijson.common.JSONError, FileNotFoundError, OSError):
-        return []
+        return None
 
     if counts and counts[-1] is None:
         counts.pop()
@@ -121,7 +121,7 @@ def is_consecutive(counts: list[int | None]) -> bool:
     return first == 1 and int_counts == expected
 
 
-def process_file(filepath: Path) -> tuple[Path, bool]:
+def process_file(filepath: Path) -> tuple[Path, bool, str | None]:
     """
     Worker function to validate a single notebook file.
 
@@ -132,15 +132,17 @@ def process_file(filepath: Path) -> tuple[Path, bool]:
 
     Returns
     -------
-    tuple[Path, bool]
-        The path object and the validation result.
+    tuple[Path, bool, str | None]
+        The path object, the validation result, and an optional error type.
     """
     if filepath.suffix != ".ipynb":
-        return filepath, True
+        return filepath, True, None
 
     counts = get_execution_counts(filepath)
+    if counts is None:
+        return filepath, False, "parse_error"
     result = is_consecutive(counts)
-    return filepath, result
+    return filepath, result, None
 
 
 def main() -> None:
@@ -171,9 +173,12 @@ def main() -> None:
     with ProcessPoolExecutor() as executor:
         results = executor.map(process_file, args.filenames)
 
-        for filepath, is_valid in results:
+        for filepath, is_valid, error in results:
             if not is_valid:
-                print(f"❌ Incorrect execution order: {filepath}")
+                if error == "parse_error":
+                    print(f"⚠️ Failed to parse notebook: {filepath}")
+                else:
+                    print(f"❌ Incorrect execution order: {filepath}")
                 failed = True
 
     if failed:
